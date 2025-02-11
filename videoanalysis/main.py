@@ -1,21 +1,20 @@
 import pprint
+import os
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from googleapiclient.discovery import build
 from youtube_transcript_api import YouTubeTranscriptApi
 
-api_key = 'AIzaSyB5wNyphqfJyzU8Yc16y7Ws38832_K1iBQ'
-api_serv_name = 'youtube'
-api_version = 'v3'
-gemini_api_key = 'AIzaSyBxz0M3F_TZtOH1Mu9pPLvnM4h_PqW0UuE'
-client = genai.Client(api_key=gemini_api_key)
-youtube = build('youtube', 'v3', developerKey=api_key)
+load_dotenv()
 
-# hidden_content = 'For each error found, explain why it is incorrect and provide supporting evidence if possible.'
-prompt_content = """You are to conduct Deep fact-check and will always response with JSON. 
-You should search on the internet or use model knowledge to fact-check the following transcript. 
-Analyze any factual errors, inconsistencies, or misleading statements but no need to output it. 
-Finally, output a score ranging from 0 to 100, where 100 is the most accurate and 0 is completely wrong. 
+client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
+youtube = build('youtube', version='v3', developerKey=os.environ.get('GOOGLE_API_KEY'))
+
+prompt_content = """You are to conduct Deep fact-check and will always response with JSON.
+You should search on the internet or use model knowledge to fact-check the following transcript.
+Analyze any factual errors, inconsistencies, or misleading statements but no need to output it.
+Finally, output a score ranging from 0 to 100, where 100 is the most accurate and 0 is completely wrong.
 Justify your score based on the number and severity of the errors found.
 Your JSON response must adhere to the following schema:
 
@@ -60,13 +59,13 @@ def format_transcript(link, transcript):
 
     final_text = f"""
         Here is the youtube link for the video to fact-check: {link}
-        This is the transcript, you can verify if there are any missing information before giving the score on accuracy: 
+        This is the transcript, you can verify if there are any missing information before giving the score on accuracy:
         Transcript: {transcript}"""
 
     return final_text
 
-# results = search('top anime fights')
-# video_id = results['items'][0]['id']['videoId']
+results = search('top anime fights')
+video_id = results['items'][0]['id']['videoId']
 video_link = get_yt_link('Z3Aje4GcURA&ab')
 transcript = get_transcript('Z3Aje4GcURA&ab')
 text = format_transcript(video_link, transcript)
@@ -79,7 +78,7 @@ response = client.models.generate_content(
         top_p=0.95,
         top_k=32,
         candidate_count=1,
-        seed=5,
+        seed=4,
         max_output_tokens=1500,
         presence_penalty=0.0,
         frequency_penalty=0.0
