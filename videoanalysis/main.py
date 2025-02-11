@@ -64,6 +64,8 @@ def format_transcript(link, transcript):
 
     return final_text
 
+
+# Hard checking for now
 results = search('top anime fights')
 video_id = results['items'][0]['id']['videoId']
 video_link = get_yt_link('Z3Aje4GcURA&ab')
